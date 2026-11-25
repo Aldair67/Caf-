@@ -43,7 +43,7 @@ label.f small{font-weight:400;color:var(--muted)}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 [hidden]{display:none!important}
 
-/* ===== tienda ===== */
+
 .sh{position:sticky;top:0;z-index:20;background:var(--esp);color:#f6ead9;transition:box-shadow .3s}
 .sh.scrolled{box-shadow:0 8px 24px -10px rgba(0,0,0,.6)}
 .nav{display:flex;align-items:center;gap:12px;padding:8px max(5vw,16px);max-width:1340px;margin:0 auto}
@@ -90,7 +90,7 @@ label.f small{font-weight:400;color:var(--muted)}
 .sf .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
 .sf button{background:#33231a;color:#f6ead9}
 
-/* carrito, ventanas */
+
 .shade{position:fixed;inset:0;background:rgba(20,12,8,.55);z-index:40;opacity:0;visibility:hidden;transition:opacity .25s,visibility 0s .25s;backdrop-filter:blur(2px)}
 .shade.on{opacity:1;visibility:visible;transition:opacity .25s}
 .drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:var(--card);z-index:50;transform:translateX(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;box-shadow:-20px 0 40px -20px rgba(0,0,0,.4)}
@@ -152,7 +152,6 @@ label.f small{font-weight:400;color:var(--muted)}
 .shake{animation:shake .4s}
 @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 
-/* ===== panel ===== */
 .app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh;background:var(--bg2)}
 .side{background:#1f140e;color:#e9dccd;position:sticky;top:0;height:100vh;padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow:auto}
 .side .logo{font-size:18px;padding:6px 8px 14px;margin:0}
@@ -228,7 +227,6 @@ table.t{width:100%;border-collapse:collapse;font-size:14px}
 .diff{font:700 22px Outfit,sans-serif}
 .cf{position:fixed;top:-40px;z-index:95;pointer-events:none}
 
-/* animación general */
 @keyframes up{from{opacity:0;transform:translateY(24px)}}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}}
 .hero h1,.hero p,.hero .cta,.hero .steps{animation:up .8s cubic-bezier(.2,.7,.2,1) both}
