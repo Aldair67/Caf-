@@ -43,7 +43,7 @@ label.f small{font-weight:400;color:var(--muted)}
 .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 [hidden]{display:none!important}
 
-
+/* ===== tienda ===== */
 .sh{position:sticky;top:0;z-index:20;background:var(--esp);color:#f6ead9;transition:box-shadow .3s}
 .sh.scrolled{box-shadow:0 8px 24px -10px rgba(0,0,0,.6)}
 .nav{display:flex;align-items:center;gap:12px;padding:8px max(5vw,16px);max-width:1340px;margin:0 auto}
@@ -90,7 +90,7 @@ label.f small{font-weight:400;color:var(--muted)}
 .sf .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
 .sf button{background:#33231a;color:#f6ead9}
 
-
+/* carrito, ventanas */
 .shade{position:fixed;inset:0;background:rgba(20,12,8,.55);z-index:40;opacity:0;visibility:hidden;transition:opacity .25s,visibility 0s .25s;backdrop-filter:blur(2px)}
 .shade.on{opacity:1;visibility:visible;transition:opacity .25s}
 .drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:var(--card);z-index:50;transform:translateX(105%);transition:transform .35s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;box-shadow:-20px 0 40px -20px rgba(0,0,0,.4)}
@@ -152,6 +152,7 @@ label.f small{font-weight:400;color:var(--muted)}
 .shake{animation:shake .4s}
 @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 
+/* ===== panel ===== */
 .app{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh;background:var(--bg2)}
 .side{background:#1f140e;color:#e9dccd;position:sticky;top:0;height:100vh;padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow:auto}
 .side .logo{font-size:18px;padding:6px 8px 14px;margin:0}
@@ -227,6 +228,7 @@ table.t{width:100%;border-collapse:collapse;font-size:14px}
 .diff{font:700 22px Outfit,sans-serif}
 .cf{position:fixed;top:-40px;z-index:95;pointer-events:none}
 
+/* animación general */
 @keyframes up{from{opacity:0;transform:translateY(24px)}}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}}
 .hero h1,.hero p,.hero .cta,.hero .steps{animation:up .8s cubic-bezier(.2,.7,.2,1) both}
@@ -437,9 +439,44 @@ function seed(){
 }
 function mkItem(it,prods=S.prods){const p=prods.find(x=>x.id===it.pid);const unit=p.p+(p.fixed?0:SIZES[it.size][1])+(p.milk?MILK[it.milk][1]:0)+it.extras.reduce((a,e)=>a+EXTRAS[e][1],0);return {...it,n:p.n,label:label(it,p),unit,line:unit*it.q}}
 function label(it,p){p=p||S.prods.find(x=>x.id===it.pid);if(!p)return it.n||'Producto';return [p.n+(p.fixed?'':' '+SIZES[it.size][0].toLowerCase()),p.milk&&it.milk?'leche '+MILK[it.milk][0].toLowerCase():'',...it.extras.map(e=>EXTRAS[e][0].toLowerCase())].filter(Boolean).join(' · ')}
-const KEY='cdb_sistema_v2';
-let S=store.get(KEY);if(!S||!S.prods)S=seed();
-const save=()=>{S.v=(S.v||0)+1;store.set(KEY,S)};save();
+const KEY = 'cdb_sistema_v2';
+const SHEETS_API = 'https://script.google.com/macros/s/AKfycbzAaOOezBrunPz7gjN1yamsPb-KENl3S6iJtIeNvH9CJ5Xxg2Pa1s_1pq2NN8QUiOYX/exec';
+
+let S = store.get(KEY);
+if (!S || !S.prods) S = seed();
+
+let syncTimer = null;
+const save = (skipCloud = false) => {
+  S.v = (S.v || 0) + 1;
+  store.set(KEY, S);
+  if (skipCloud || !SHEETS_API.startsWith('http')) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    fetch(SHEETS_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(S)
+    }).catch(err => console.warn('Error sincronizando con Sheets:', err));
+  }, 600);
+};
+
+async function pullFromSheets() {
+  if (!SHEETS_API.startsWith('http')) return;
+  try {
+    const res = await fetch(SHEETS_API);
+    const remote = await res.json();
+    if (remote && remote.prods && (!S.v || remote.v > S.v)) {
+      S = remote;
+      store.set(KEY, S);
+      if (typeof route === 'function') route();
+    } else if (!remote || !remote.prods) {
+      save(); // Sube los datos iniciales si la hoja está vacía
+    }
+  } catch (err) {
+    console.warn('No se pudo leer de Google Sheets:', err);
+  }
+}
+pullFromSheets();
 const logAct=(act)=>{S.log.unshift({ts:Date.now(),user:me?me.u:'tienda',act});S.log=S.log.slice(0,200)};
 
 /* ---------- inventario ---------- */
